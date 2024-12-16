@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}
+О нас
+{% endblock %}
+
+{% block body %}
+  <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url("{{ url_for('static', filename='img/onas1.jpg') }}");
+            background-size: cover;
+        }
+</style>
+<div class="container">
+
+    <h1 class="page-title">Косметический салон Дарья</h1>
+    <div class="row">
+            <section class="main-col col-md-12">
+                                  <div class="region region-content">
+    <section id="block-system-main" class="block block-system clearfix">
+
+
+  <div class="field field-name-body field-type-text-with-summary field-label-hidden"><div class="field-items"><div class="field-item even"><div style="max-width:600px;">
+<p class="rtejustify">Высокие традиции безупречного обслуживания — один из главных факторов, влияющих на любовь и признание постоянных клиентов.</p>
+
+<p class="rtejustify">Собственный неповторимый стиль в салоне Дарья оттачивался годами: косметический салон открылся более 26&nbsp;лет назад, став законодателем стандартов и тенденций в столичной индустрии красоты. Дарья сегодня — это салон класса люкс, это европейское качество&nbsp;и славянское гостеприимство. Ежедневно двери Дарьи открываются для того, чтобы подарить Вам неповторимые эмоции и окунуть Вас в мир красоты.</p>
+
+<p class="rtejustify">Элегантность и романтичность, изощренность, но не нарочитость. В Дарье знают, насколько важна гармоничная атмосфера салона для полного расслабления посетителей. Интерьер воплотил в себе&nbsp;сочетание&nbsp;элегантности&nbsp;и домашнего&nbsp;уюта. Цветовая гамма благородна и сдержанна, изюминку добавляет разнообразие фактур и тканей.&nbsp;Подобный дизайн вызывает ощущение истинного эстетического наслаждения, дополняя общее впечатление живыми цветами.</p>
+</div>
+</div></div></div>
+</section>
+  </div>
+      </section>
+                </div>
+  </div>
+{% endblock %}

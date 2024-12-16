@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <title>{% block title %}{% endblock %}</title>
+
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url("{{ url_for('static', filename='img/oboi1.jpg') }}");
+            background-size: cover;
+        }
+
+        .navbar {
+            z-index: 1000;
+        }
+
+        .nav-scroller {
+            z-index: 999;
+            position: fixed;
+            width: 100%;
+            top: 56px; /* Вы можете настроить это значение в зависимости от высоты вашей шапки */
+            background-color: #343a40; /* Цвет фона вашей шапки */
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Дарья</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                    </li>
+                </ul>
+
+                <span class="navbar-text me-2">Время работы: Пн.-Вс. 9:00 - 18:00</span>
+
+                <div class="d-flex">
+<!--                    <form class="d-flex me-2" role="search">-->
+<!--                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">-->
+<!--                        <button class="btn btn-outline-success" type="submit">Search</button>-->
+<!--                    </form>-->
+  <a class="btn btn-outline-light" href="/reg#signin">Войти</a>
+                  <a class="btn btn-outline-light" href="/podpiska">Оформить подписку</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<div class="nav-scroller py-1 mb-3 border-bottom" style="background-color: rgba(0, 0, 0, 0.5);">
+    <nav class="nav nav-underline justify-content-between">
+        <a class="btn btn-outline-light" href="/about" role="button">О нас </a>
+        <a class="btn btn-outline-light" href="/uslug" role="button">Услуги</a>
+        <a class="btn btn-outline-light" href="/master" role="button">Мастера</a>
+        <a class="btn btn-outline-light" href="/info_price_basik" role="button">Прайс-лист</a>
+        <a class="btn btn-outline-light" href="/review" role="button">Отзывы</a>
+
+    </nav>
+</div>
+
+    {% block body %}{% endblock %}
+
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistics</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="service_plot"></div>
+    <div id="master_plot"></div>
+    <div id="client_plot"></div>
+    <div id="most_visited_service"></div>
+
+    <script>
+
+        var service_fig = '{{ service_fig | safe }}';
+        var master_fig = '{{ master_fig | safe }}';
+        var client_fig = '{{ client_fig | safe }}';
+
+
+        var service_data = JSON.parse(service_fig);
+        var master_data = JSON.parse(master_fig);
+        var client_data = JSON.parse(client_fig);
+
+
+        Plotly.newPlot('service_plot', service_data.data, service_data.layout);
+        Plotly.newPlot('master_plot', master_data.data, master_data.layout);
+        Plotly.newPlot('client_plot', client_data.data, client_data.layout);
+
+
+        var mostVisitedServiceData = JSON.parse('{{ most_visited_service_data | safe }}');
+        var mostVisitedServiceHtml = "<p>Самая посещаемая услуга: " + mostVisitedServiceData.service_name + "</p>";
+        mostVisitedServiceHtml += "<p>" + mostVisitedServiceData.master_count + " мастер(а) выполняли эту услугу</p>";
+        document.getElementById('most_visited_service').innerHTML = mostVisitedServiceHtml;
+    </script>
+</body>
+</html>

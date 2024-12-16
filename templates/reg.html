@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация!</title>
+    <link rel="stylesheet" href="static/css/styles.css" />
+    <!--[if lt IE 9]>
+        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <section class="container">
+        <article class="half">
+            <h1>Azure</h1>
+            <div class="tabs">
+                <span class="tab signin active"><a href="{{ url_for('signin') }}">Sign in</a></span>
+                <span class="tab signup"><a href="{{ url_for('signup') }}" onclick="showSignUp()">Sign up</a></span>
+            </div>
+            <div class="content">
+                <div class="signin-cont cont">
+                    <form action="{{ url_for('signin') }}" method="post" enctype="multipart/form-data">
+                        <input type="email" name="email" id="email" class="inpt" required="required" placeholder="Your email">
+                        <input type="password" name="password" id="password" class="inpt" required="required" placeholder="Your password">
+                        <div class="submit-wrap">
+                            <input type="submit" value="Sign in" class="submit">
+                        </div>
+                    </form>
+                </div>
+                <div class="signup-cont cont">
+                    <!-- Ваш код для регистрации -->
+                </div>
+            </div>
+        </article>
+        <div class="half bg"></div>
+    </section>
+
+    <!-- JavaScript includes -->
+    <script src="//code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        function showSignUp() {
+            $('.tabs .tab').removeClass('active');
+            $('.signup').addClass('active');
+            $('.cont').hide();
+            $('.signup-cont').show();
+        }
+
+        function signUp() {
+            alert('Sign Up button clicked!');
+        }
+    </script>
+</body>
+</html>

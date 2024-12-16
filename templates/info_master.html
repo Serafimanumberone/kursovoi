@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о мастерах</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid black;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            color: white;
+            border-bottom: 2px solid white;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 10px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid black;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 5px;
+        }
+        .button-container button:hover {
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<div class="button-container">
+    <button onclick="showPopupForm('addMasterForm')">Добавить</button>
+    <button onclick="showPopupForm('editMasterForm')">Изменить</button>
+    <button onclick="showPopupForm('deleteMasterForm')">Удалить</button>
+</div>
+
+<!-- Добавлено поле для ввода текста поиска -->
+<input type="text" id="searchInput" oninput="searchMasterTable()" placeholder="Поиск...">
+
+<h2>Информация о мастерах</h2>
+<table id="masterTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Surname</th>
+            <th>Name</th>
+            <th>Job Title</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for master in masters %}
+            <tr>
+                <td>{{ master[0] }}</td>
+                <td>{{ master[1] }}</td>
+                <td>{{ master[2] }}</td>
+                <td>{{ master[3] }}</td>
+                <td>{{ master[4] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Всплывающая форма для добавления мастера -->
+<div id="addMasterForm" class="popup-form">
+    <h3>Добавить мастера</h3>
+    <form action="/add_master" method="post">
+    <div class="input-wrap">
+        <input type="text" name="surname" id="surname" class="inpt" required="required" placeholder="Фамилия">
+    </div>
+
+   <div class="input-wrap">
+        <input type="text" name="name" id="name" class="inpt" required="required" placeholder="Имя">
+    </div>
+
+       <div class="input-wrap">
+        <input type="text" name="job_title" id="job_title" class="inpt" required="required" placeholder="Должность">
+    </div>
+
+ <div class="input-wrap">
+        <input type="text" name="description" id="description" class="inpt" required="required" placeholder="Описание">
+    </div>
+
+
+        <button type="submit">Добавить</button>
+        <button type="button" onclick="hidePopupForm('addMasterForm')">Отмена</button>
+    </form>
+</div>
+<!-- Всплывающая форма для изменения мастера -->
+<div id="editMasterForm" class="popup-form">
+    <h3>Изменить мастера</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID мастера -->
+    <label for="editMasterIdInput">Введите ID мастера:</label>
+    <input type="text" id="editMasterIdInput" required>
+    <button type="button" onclick="loadMasterData()">Выбрать ID</button>
+
+    <form id="editMasterForm" action="/edit_master" method="post">
+        <!-- Добавлено скрытое поле для передачи ID мастера -->
+        <input type="hidden" id="editMasterId" name="editMasterId" value="">
+
+        <label for="editSurname">Фамилия:</label>
+        <input type="text" id="editSurname" name="editSurname" required><br>
+
+        <label for="editName">Имя:</label>
+        <input type="text" id="editName" name="editName" required><br>
+
+        <label for="editJobTitle">Должность:</label>
+        <input type="text" id="editJobTitle" name="editJobTitle" required><br>
+
+        <label for="editDescription">Описание:</label>
+        <textarea id="editDescription" name="editDescription" rows="4" required></textarea><br>
+
+        <button type="submit">Изменить</button>
+        <button type="button" onclick="hidePopupForm('editMasterForm')">Отмена</button>
+    </form>
+</div>
+
+<!-- Всплывающая форма для удаления мастера -->
+<div id="deleteMasterForm" class="popup-form">
+    <h3>Удалить мастера</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID мастера -->
+    <label for="deleteMasterIdInput">Введите ID мастера:</label>
+    <input type="text" id="deleteMasterIdInput" required>
+    <button type="button" onclick="deleteMaster()">Удалить мастера</button>
+
+    <button type="button" onclick="hidePopupForm('deleteMasterForm')">Отмена</button>
+</div>
+
+<script>
+    function showPopupForm(formId) {
+        document.getElementById(formId).style.display = 'block';
+    }
+
+    function hidePopupForm(formId) {
+        document.getElementById(formId).style.display = 'none';
+    }
+
+    // Функция для загрузки данных мастера после ввода ID вручную
+    function loadMasterData() {
+        var enteredId = document.getElementById('editMasterIdInput').value;
+
+        // Заполняем скрытое поле формы введенным ID
+        document.getElementById('editMasterId').value = enteredId;
+
+        // Загружаем данные мастера по введенному ID и заполняем форму
+        fetchMasterData(enteredId);
+    }
+
+    // Функция для динамического добавления опций в выпадающий список
+    function fillMasterIdOptions(masterIds) {
+        var selectElement = document.getElementById('selectMasterId');
+
+        // Очищаем текущие опции перед добавлением новых
+        selectElement.innerHTML = '';
+
+        // Добавляем опции для каждого ID мастера
+        masterIds.forEach(function (id) {
+            var option = document.createElement('option');
+            option.value = id;
+            option.text = id;
+            selectElement.add(option);
+        });
+    }
+
+    // Функция для загрузки данных мастера с сервера
+    function fetchMasterData(masterId) {
+        // Выполните запрос к серверу, чтобы получить данные мастера по ID
+        // Затем заполните поля формы полученными данными
+        // Пример:
+        // fetch(/get_master_data/${masterId})
+        //     .then(response => response.json())
+        //     .then(data => fillFormData(data));
+    }
+
+    // Функция для отправки формы изменения мастера
+    function submitEditForm() {
+        // В этой функции вы можете добавить логику для проверки данных и отправки формы
+        // Например, используйте fetch() для отправки данных на сервер
+        // Пример:
+        // fetch('/edit_master', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         editMasterId: document.getElementById('editMasterId').value,
+        //         editSurname: document.getElementById('editSurname').value,
+        //         editName: document.getElementById('editName').value,
+        //         editJobTitle: document.getElementById('editJobTitle').value,
+        //         editSchedule: document.getElementById('editSchedule').value,
+        //         editDescription: document.getElementById('editDescription').value,
+        //     }),
+        // })
+        // .then(response => response.json())
+        // .then(data => handleEditResponse(data));
+    }
+
+    // Функция для обработки ответа после редактирования мастера
+    function handleEditResponse(data) {
+        // В этой функции вы можете обработать ответ от сервера после редактирования мастера
+        // Например, показать сообщение об успешном изменении или об ошибке
+        // Затем, при необходимости, обновите страницу или скройте форму
+    }
+
+    // Функция для отображения модального окна ввода ID мастера
+    function showEditForm() {
+        // В этой функции вы должны загрузить список ID мастеров с сервера
+        // и вызвать fillMasterIdOptions для добавления их в выпадающий список
+        fetchMasterIdsAndFillOptions();
+    }
+
+    // Функция для запроса ID мастеров с сервера и добавления их в выпадающий список
+    function fetchMasterIdsAndFillOptions() {
+        // Выполните запрос к серверу, чтобы получить список ID мастеров
+        // Пример:
+        // fetch('/get_master_ids')
+        //     .then(response => response.json())
+        //     .then(data => fillMasterIdOptions(data));
+
+    }
+
+    function deleteMaster() {
+        var masterId = document.getElementById('deleteMasterIdInput').value;
+
+        // Выполните запрос к серверу для удаления мастера
+        fetch(`/delete_master/${masterId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => handleDeleteResponse(data));
+    }
+
+    function handleDeleteResponse(data) {
+        // Обработайте ответ от сервера после удаления мастера
+        // Например, покажите сообщение об успехе или ошибке
+        console.log(data);
+
+        // После успешного удаления мастера можно обновить страницу или скрыть форму
+        if (data.success) {
+            // Обновление страницы (замените этот код на свой)
+            window.location.reload();
+        } else {
+            // Показать сообщение об ошибке (замените этот код на свой)
+            alert('Ошибка при удалении мастера: ' + data.message);
+        }
+    }
+
+       function searchMasterTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("masterTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Перебираем все строки таблицы и все ячейки в них
+        for (i = 0; i < tr.length; i++) {
+            var display = false; // Флаг для отображения строки
+
+            // Перебираем все ячейки в текущей строке
+            for (j = 0; j < tr[i].cells.length; j++) {
+                td = tr[i].cells[j];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+
+                    // Если хотя бы в одной ячейке есть соответствие поиску, устанавливаем флаг отображения
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        display = true;
+                        break; // Прерываем внутренний цикл, так как уже нашли соответствие
+                    }
+                }
+            }
+
+            // Устанавливаем стиль отображения в зависимости от флага
+            tr[i].style.display = display ? "" : "none";
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

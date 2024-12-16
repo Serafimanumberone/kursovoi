@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о сервисах</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid black;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            color: white;
+            border-bottom: 2px solid white;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 10px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid black;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 5px;
+        }
+        .button-container button:hover {
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="button-container">
+    <button onclick="showPopupForm('addServiceForm')">Добавить</button>
+    <button onclick="showPopupForm('editServiceForm')">Изменить</button>
+    <button onclick="showPopupForm('deleteServiceForm')">Удалить</button>
+</div>
+<input type="text" id="searchInput" oninput="searchServiceTable()" placeholder="Поиск...">
+
+<h2>Информация о сервисах</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name Category</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+            <tr>
+                <td>{{ service[0] }}</td>
+                <td>{{ service[1] }}</td>
+                <td>{{ service[2] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Всплывающая форма для добавления сервиса -->
+<div id="addServiceForm" class="popup-form">
+    <h3>Добавить сервис</h3>
+    <form action="/add_service" method="post">
+        <label for="name_category">Название категории:</label>
+        <input type="text" id="name_category" name="name_category" required><br>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" rows="4" required></textarea><br>
+
+        <button type="submit">Добавить</button>
+        <button type="button" onclick="hidePopupForm('addServiceForm')">Отмена</button>
+    </form>
+</div>
+<!-- Всплывающая форма для изменения сервиса -->
+<div id="editServiceForm" class="popup-form">
+    <h3>Изменить сервис</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID сервиса -->
+    <label for="editServiceIdInput">Введите ID сервиса:</label>
+    <input type="text" id="editServiceIdInput" required>
+    <button type="button" onclick="loadServiceData()">Выбрать ID</button>
+
+    <form id="editServiceForm" action="/edit_service" method="post">
+        <!-- Добавлено скрытое поле для передачи ID сервиса -->
+        <input type="hidden" id="editServiceId" name="editServiceId" value="">
+
+        <label for="editNameCategory">Название категории:</label>
+        <input type="text" id="editNameCategory" name="editNameCategory" required><br>
+
+        <label for="editDescription">Описание:</label>
+        <textarea id="editDescription" name="editDescription" rows="4" required></textarea><br>
+
+        <button type="submit">Изменить</button>
+        <button type="button" onclick="hidePopupForm('editServiceForm')">Отмена</button>
+    </form>
+</div>
+
+<!-- Всплывающая форма для удаления сервиса -->
+<div id="deleteServiceForm" class="popup-form">
+    <h3>Удалить сервис</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID сервиса -->
+    <label for="deleteServiceIdInput">Введите ID сервиса:</label>
+    <input type="text" id="deleteServiceIdInput" required>
+    <button type="button" onclick="deleteService()">Удалить сервис</button>
+
+    <button type="button" onclick="hidePopupForm('deleteServiceForm')">Отмена</button>
+</div>
+
+<script>
+    function showPopupForm(formId) {
+        document.getElementById(formId).style.display = 'block';
+    }
+
+    function hidePopupForm(formId) {
+        document.getElementById(formId).style.display = 'none';
+    }
+
+    function loadServiceData() {
+        var serviceIdInput = document.getElementById("editServiceIdInput").value;
+        document.getElementById("editServiceId").value = serviceIdInput;
+        // Fetch and populate service data based on the entered ID
+        // Add your AJAX request here to fetch service data by ID and populate the form
+    }
+
+    function deleteService() {
+        var serviceId = document.getElementById('deleteServiceIdInput').value;
+
+        // Add your AJAX request here to delete the service by ID
+        // Handle the response and update the table accordingly
+        fetch(`/delete_service/${serviceId}`, {
+            method: 'DELETE',
+        })
+        .then(response => response.json())
+        .then(data => handleDeleteServiceResponse(data));
+    }
+
+    function handleDeleteServiceResponse(data) {
+        // Handle the response from the server after deleting the service
+        console.log(data);
+
+        if (data.success) {
+            // Reload the page or update the table (replace this with your logic)
+            window.location.reload();
+        } else {
+            // Show an error message (replace this with your logic)
+            alert('Ошибка при удалении сервиса: ' + data.message);
+        }
+    }
+
+        function searchServiceTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.querySelector("table");
+        tr = table.getElementsByTagName("tr");
+
+        // Перебираем все строки таблицы и все ячейки в них
+        for (i = 0; i < tr.length; i++) {
+            var display = false; // Флаг для отображения строки
+
+            // Перебираем все ячейки в текущей строке
+            for (j = 0; j < tr[i].cells.length; j++) {
+                td = tr[i].cells[j];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+
+                    // Если хотя бы в одной ячейке есть соответствие поиску, устанавливаем флаг отображения
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        display = true;
+                        break; // Прерываем внутренний цикл, так как уже нашли соответствие
+                    }
+                }
+            }
+
+            // Устанавливаем стиль отображения в зависимости от флага
+            tr[i].style.display = display ? "" : "none";
+        }
+    }
+</script>
+
+</body>
+</html>

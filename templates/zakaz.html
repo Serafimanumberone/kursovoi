@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о заказах</title>
+    <button onclick="downloadExcel()">Отчёт</button>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #000;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #555;
+            color: #fff;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .actions button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Информация о заказах</h2>
+
+    <!-- Поле для ввода текста поиска -->
+    <input type="text" id="searchInput" placeholder="Поиск...">
+
+    <!-- Кнопка для запуска поиска -->
+    <button onclick="searchAppointments()">Найти</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID заказа</th>
+                <th>Мастер</th>
+                <th>Клиент</th>
+                <th>Услуга</th>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set sorted_appointments = appointments | sort(attribute=0, reverse=true) %}
+            {% for appointment in sorted_appointments %}
+            <tr>
+                <td>{{ appointment[0] }}</td>
+                <td>{{ appointment[1] }}</td>
+                <td>{{ appointment[2] }}</td>
+                <td>{{ appointment[3] }}</td>
+                <td>{{ appointment[4] }}</td>
+                <td>{{ appointment[5] }}</td>
+                <td class="actions">
+                    <button onclick="editAppointment({{ appointment[0] }})">Изменить</button>
+                    <button onclick="deleteAppointment({{ appointment[0] }})">Удалить</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <button onclick="openAddModal()">Добавить</button>
+    </div>
+
+    <!-- Модальное окно для редактирования заказа -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeEditModal()" style="float: right; cursor: pointer;">&times;</span>
+            <h3>Редактировать заказ</h3>
+            <form id="editForm" action="/edit_appointment" method="post">
+                <input type="hidden" id="editAppointmentId" name="editAppointmentId">
+                <label for="editMasterId">Мастер:</label>
+                <input type="text" id="editMasterId" name="editMasterId" required>
+                <label for="editClientId">Клиент:</label>
+                <input type="text" id="editClientId" name="editClientId" required>
+                <label for="editServiceId">Услуга:</label>
+                <input type="text" id="editServiceId" name="editServiceId" required>
+                <label for="editDate">Дата:</label>
+                <input type="text" id="editDate" name="editDate" required>
+                <label for="editTime">Время:</label>
+                <input type="text" id="editTime" name="editTime" required>
+                <button type="submit">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления заказа -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeAddModal()" style="float: right; cursor: pointer;">&times;</span>
+            <h3>Добавить заказ</h3>
+            <form id="addForm" action="/add_appointment" method="post">
+                <label for="master_id">Мастер:</label>
+                <input type="text" name="master_id" required>
+                <label for="client_id">Клиент:</label>
+                <input type="text" name="client_id" required>
+                <label for="service_id">Услуга:</label>
+                <input type="text" name="service_id" required>
+                <label for="date">Дата:</label>
+                <input type="text" name="date" required>
+                <label for="time">Время:</label>
+                <input type="text" name="time" required>
+                <button type="submit">Добавить заказ</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function deleteAppointment(appointmentId) {
+            // Отправляем запрос на сервер для удаления заказа
+            fetch(`/delete_appointment/${appointmentId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Заказ успешно удален!');
+                        // Обновляем страницу после удаления заказа
+                        location.reload();
+                    } else {
+                        alert('Ошибка при удалении заказа: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при удалении заказа:', error);
+                });
+        }
+
+        function editAppointment(appointmentId) {
+            // Получаем данные о заказе для редактирования
+            fetch(`/get_appointment/${appointmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Заполняем форму редактирования данными о заказе
+                        document.getElementById('editAppointmentId').value = data.appointment.id_a;
+                        document.getElementById('editMasterId').value = data.appointment.id_m;
+                        document.getElementById('editClientId').value = data.appointment.id;
+                        document.getElementById('editServiceId').value = data.appointment.id_s;
+                        document.getElementById('editDate').value = data.appointment.date;
+                        document.getElementById('editTime').value = data.appointment.time;
+
+                        // Открываем модальное окно для редактирования
+                        document.getElementById('editModal').style.display = 'block';
+                    } else {
+                        alert('Ошибка при получении данных для редактирования заказа.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при получении данных для редактирования заказа:', error);
+                });
+        }
+
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'block';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function searchAppointments() {
+            // Получаем текст для поиска
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+
+            // Получаем все строки таблицы
+            var rows = document.querySelectorAll('tbody tr');
+
+            // Перебираем строки таблицы и скрываем те, которые не соответствуют поиску
+            rows.forEach(function(row) {
+                var cells = row.getElementsByTagName('td');
+                var found = false;
+
+                // Перебираем ячейки в каждой строке
+                for (var i = 0; i < cells.length; i++) {
+                    var cellText = cells[i].innerText.toLowerCase();
+
+                    // Если текст в ячейке содержит введенный для поиска текст, то показываем строку
+                    if (cellText.includes(searchText)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                // Отображаем или скрываем строку в зависимости от результата поиска
+                if (found) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+          function downloadExcel() {
+        // Отправляем запрос на сервер для скачивания Excel файла
+        fetch('/download_excel_with_stats', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // Установите правильный Content-Type
+            },
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            // Создаем Blob объект и создаем URL для скачивания
+            var url = window.URL.createObjectURL(blob);
+
+            // Создаем ссылку для скачивания
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'appointments_with_stats.xlsx'; // Установите имя файла для скачивания
+
+            // Добавляем ссылку в документ и симулируем клик
+            document.body.appendChild(a);
+            a.click();
+
+            // Удаляем ссылку из документа
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            console.error('Ошибка при скачивании Excel файла:', error);
+        });
+    }
+
+    </script>
+</body>
+
+</html>

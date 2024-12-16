@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отзыв</title>
+    <!-- Подключаем Bootstrap для стилей -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .rating-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .star {
+            font-size: 24px;
+            color: #FFD700;
+            cursor: pointer;
+        }
+
+        .star:hover {
+            color: #FFA500;
+        }
+
+        .rating-value {
+            margin-left: 10px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Оставьте свой отзыв</h1>
+
+<form action="{{ url_for('review') }}" method="post">
+        <div class="form-group">
+            <label for="review">Ваш отзыв:</label>
+            <textarea class="form-control" name="review" id="review" rows="4" required></textarea>
+        </div>
+
+<div class="rating-container">
+    <span class="star" onclick="setRating(1)">&#9733;</span>
+    <span class="star" onclick="setRating(2)">&#9733;</span>
+    <span class="star" onclick="setRating(3)">&#9733;</span>
+    <span class="star" onclick="setRating(4)">&#9733;</span>
+    <span class="star" onclick="setRating(5)">&#9733;</span>
+    <div class="rating-value" id="ratingValue">0/5</div>
+    <input type="hidden" name="grade" id="gradeInput" value="0">  <!-- Добавлено поле оценки -->
+</div>
+
+        <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+    </form>
+<table>
+    <thead>
+        <tr>
+            <th>Номер</th>
+            <th>Отзыв</th>
+            <th>Оценка</th>
+            <th>Рейтинг</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for review in reviews %}
+            <tr>
+                <td>{{ review[0] }}</td>
+                <td>{{ review[1] }}</td>
+                <td>{{ review[2] }}</td>
+                <td>
+                    {% for _ in range(review[2]) %}
+                        &#9733;
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    <!-- Подключаем Bootstrap для скриптов (необходим jQuery и Popper.js) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+var selectedRating = 0;
+
+function setRating(rating) {
+    selectedRating = rating;
+    document.getElementById("ratingValue").innerHTML = rating + "/5";
+    document.getElementById("gradeInput").value = rating;  // Обновлено значение оценки
+}
+
+    </script>
+</body>
+</html>

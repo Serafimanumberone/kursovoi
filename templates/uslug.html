@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}
+О нас
+{% endblock %}
+
+{% block body %}
+    <style>
+.service-container {
+    width: 80%;
+    margin: 10px auto 20px; /* Уменьшен отступ снизу, увеличен сверху */
+}
+.service-table {
+    width: 100%;
+    margin-bottom: 0;
+    background-color: #fff;
+    margin-top: 100px; /* Увеличен отступ сверху */
+}
+
+
+
+
+        .service-table th, .service-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .service-table th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .service-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .service-table th:hover {
+            background-color: #555;
+        }
+
+        .description-container {
+            margin-top: 0px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+<div class="service-container">
+    <h1>Информация об услугах</h1>
+
+    <table class="service-table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Номер</th>
+                <th>Название категории</th>
+                <th>Описание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+                <tr onclick="showDescription('{{ service[2] }}')">
+                    <td>{{ service[0] }}</td>
+                    <td>{{ service[1] }}</td>
+                    <td>{{ service[2] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="descriptionContainer" class="description-container">
+        <!-- Сюда будет вставлено подробное описание -->
+    </div>
+</div>
+
+<script>
+    function showDescription(description) {
+        document.getElementById('descriptionContainer').innerHTML = '<strong>Подробное описание:</strong> ' + description;
+    }
+
+    var isDescending = true;  // Флаг для отслеживания порядка сортировки
+
+    function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.querySelector(".service-table");
+        switching = true;
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < rows.length - 1; i++) {
+                shouldSwitch = false;
+                x = parseFloat(rows[i].getElementsByTagName("td")[columnIndex].innerHTML);
+                y = parseFloat(rows[i + 1].getElementsByTagName("td")[columnIndex].innerHTML);
+
+                if (isDescending ? x < y : x > y) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+
+        isDescending = !isDescending;  // Изменение направления сортировки после каждого клика
+    }
+</script>
+{% endblock %}

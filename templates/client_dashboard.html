@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн-заявка</title>
+    <style>
+        /* Add your styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: black;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        /* Add style for price display */
+        .price-display {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<a href="/">
+    <button type="button">Выход</button>
+</a>
+<a href="/history">
+    <button type="button">История заказов</button>
+</a>
+    <a href="/review">
+        <button type="button">Оставить отзыв</button>
+    </a>
+<!--
+<a href="/podpiska">
+    <button type="button">Оформить подписку</button>
+</a>
+-->
+
+<form action="/client_dashboard" method="post">
+    <label for="surname">Фамилия:</label>
+    <input type="text" id="surname" name="surname" required value="{{ session['surname'] if 'surname' in session else '' }}">
+
+    <label for="name">Имя:</label>
+    <input type="text" id="name" name="name" required value="{{ session['name'] if 'name' in session else '' }}">
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required value="{{ session['email'] if 'email' in session else '' }}">
+
+
+<select name="service" id="serviceSelect" onchange="updateMasters()">
+    <option value="" disabled selected>Выберите услугу</option>
+    {% for service in services %}
+        <option value="{{ service[0] }}" data-price="{{ service[2] }}">{{ service[1] }}</option>
+    {% endfor %}
+</select>
+
+        <label for="master">Выберите мастера:</label>
+        <select id="master" name="master" required>
+            <option value="" disabled selected>Выберите мастера</option>
+            {% for master in masters %}
+                <option value="{{ master[0] }}">{{ master[1] }}</option>
+            {% endfor %}
+        </select>
+
+    <label for="date">Дата:</label>
+    <input type="date" id="date" name="date" required>
+
+<label for="time">Время:</label>
+    <input type="time" id="time" name="time" required min="09:00" max="18:00">
+
+
+
+
+    <input type="hidden" name="service" value="{{ selected_service }}">
+<form id="appointmentForm" action="/register_appointment" method="post" onsubmit="registerAppointment()">
+    <input type="hidden" name="id_m" value="{{ selected_master }}">
+    <input type="hidden" name="id" value="{{ session['id'] }}">
+    <input type="hidden" name="id_s" value="{{ selected_service }}">
+    <input type="hidden" name="date" value="{{ request.form.get('date') }}">
+    <input type="hidden" name="time" value="{{ request.form.get('time') }}">
+
+    <button type="submit">Зарегистрироваться</button>
+</form>
+        {% if selected_master %}
+        <input type="hidden" name="master" value="{{ selected_master }}">
+    {% endif %}
+
+
+</form>
+
+<script>
+
+function updateMasters() {
+    var selectedService = document.getElementById("serviceSelect").value;
+    var selectedMaster = document.getElementById("master").value;  // Добавлено
+
+    console.log("Selected Service:", selectedService);
+    console.log("Selected Master:", selectedMaster);  // Добавлено
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '{{ url_for('client_dashboard') }}', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            // Очищаем текущие опции мастеров перед добавлением новых
+
+
+
+            document.getElementById("master").innerHTML = '<option value="" disabled selected></option>';
+
+            // Добавляем новые опции мастеров
+            document.getElementById("master").innerHTML += xhr.responseText;
+
+        }
+
+    };
+
+    // Изменено: добавлено значение для поля master в запросе
+    xhr.send("service=" + selectedService + "&master=" + selectedMaster);
+
+
+    // Выводим цену выбранной услуги
+    updatePrice(selectedService);
+}
+
+function updatePrice(serviceId) {
+    var selectedOption = document.querySelector(`#serviceSelect option[value="${serviceId}"]`);
+    var price = selectedOption ? selectedOption.getAttribute('data-price') : '0';
+
+    // Обновляем цену на странице
+    document.getElementById('priceDisplay').textContent = `Цена: ${price}`;
+}
+
+     // Добавляем обработчик событий для поля ввода времени
+    document.getElementById('time').addEventListener('input', function() {
+        var selectedTime = this.value;
+        var minTime = '09:00';
+        var maxTime = '18:00';
+
+        // Проверяем, находится ли выбранное время в допустимом диапазоне
+        if (selectedTime < minTime || selectedTime > maxTime) {
+            alert('Выберите время с 09:00 до 18:00');
+            this.value = ''; // Очищаем поле ввода времени
+        }
+    })
+
+    function registerAppointment() {
+    // Собираем данные из формы
+    var formData = new FormData(document.getElementById("yourFormId"));
+
+    // Создаем XMLHttpRequest объект
+    var xhr = new XMLHttpRequest();
+
+    // Настраиваем запрос POST на /register_appointment
+    xhr.open("POST", "/register_appointment", true);
+
+    // Отправляем данные формы
+    xhr.send(formData);
+
+    // Обработчик события, вызываемый при завершении запроса
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            // Получаем ответ от сервера
+            var response = JSON.parse(xhr.responseText);
+
+            // Проверяем успешность операции
+            if (response.success) {
+                alert("Запись успешно добавлена!");
+            } else {
+                alert("Ошибка при добавлении записи: " + response.error);
+            }
+        }
+    };
+}
+
+</script>
+
+</body>
+</html>

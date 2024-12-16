@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Косметический салон - Информация о прайс-листе
+{% endblock %}
+
+{% block body %}
+
+    <!-- Ваш код для отображения информации о прайс-листе -->
+    <h2>Прайс-лист</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Имя сервиса</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for price in price_list %}
+                <tr>
+                    <td>{{ price[1] }}</td>
+                    <td>{{ price[2] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

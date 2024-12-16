@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}
+Мастера
+{% endblock %}
+
+{% block body %}
+<style>
+    .master-container {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(300px, 1fr)); /* изменение здесь */
+        grid-gap: 20px;
+        margin: 20px auto;
+    }
+
+    .master-card {
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .master-card:hover {
+        transform: scale(1.05);
+    }
+
+    .master-card img {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .master-info {
+        font-size: 16px;
+    }
+</style>
+
+<div class="master-container">
+    {% for master in master_data %}
+    <div class="master-card" onclick="showDescription('{{ master[5] }}')">
+        <img src="{{ master[6] }}" alt="{{ master[1] }} {{ master[2] }}">
+        <div class="master-info">
+            <strong>{{ master[1] }} {{ master[2] }}</strong><br>
+            <em>{{ master[3] }}</em><br>
+            {{ master[4] }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="descriptionContainer" class="description-container">
+    <!-- Сюда будет вставлено подробное описание -->
+</div>
+
+<script>
+    function showDescription(description) {
+        document.getElementById('descriptionContainer').innerHTML = '<strong>Подробное описание:</strong> ' + description;
+    }
+</script>
+{% endblock %}

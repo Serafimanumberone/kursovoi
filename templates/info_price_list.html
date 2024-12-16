@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о прайс-листе</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid black;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            color: white;
+            border-bottom: 2px solid white;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 10px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid black;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 5px;
+        }
+        .button-container button:hover {
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="button-container">
+    <button onclick="showPopupForm('addPriceForm')">Добавить</button>
+    <button onclick="showPopupForm('editPriceForm')">Изменить</button>
+    <button onclick="showPopupForm('deletePriceForm')">Удалить</button>
+</div>
+<input type="text" id="searchInput" oninput="searchPriceList()" placeholder="Поиск...">
+
+<h2>Информация о прайс-листе</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ID сервиса</th>
+            <th>Цена</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for price in price_list %}
+            <tr>
+                <td>{{ price[0] }}</td>
+                <td>{{ price[1] }}</td>
+                <td>{{ price[2] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Всплывающая форма для добавления позиции в прайс-лист -->
+<div id="addPriceForm" class="popup-form">
+    <h3>Добавить позицию в прайс-лист</h3>
+    <form action="/add_price_list" method="post">
+        <label for="serviceId">ID сервиса:</label>
+        <input type="text" id="serviceId" name="serviceId" required><br>
+
+        <label for="price">Цена:</label>
+        <input type="text" id="price" name="price" required><br>
+
+        <button type="submit">Добавить</button>
+        <button type="button" onclick="hidePopupForm('addPriceForm')">Отмена</button>
+    </form>
+</div>
+<!-- Всплывающая форма для изменения позиции в прайс-листе -->
+<div id="editPriceForm" class="popup-form">
+    <h3>Изменить позицию в прайс-листе</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID позиции в прайс-листе -->
+    <label for="editPriceIdInput">Введите ID позиции в прайс-листе:</label>
+    <input type="text" id="editPriceIdInput" required>
+    <button type="button" onclick="loadPriceData()">Выбрать ID</button>
+
+    <form id="editPriceForm" action="/edit_price_list" method="post">
+        <!-- Добавлено скрытое поле для передачи ID позиции в прайс-листе -->
+        <input type="hidden" id="editPriceId" name="editPriceId" value="">
+
+        <label for="editServiceId">ID сервиса:</label>
+        <input type="text" id="editServiceId" name="editServiceId" required><br>
+
+        <label for="editPrice">Цена:</label>
+        <input type="text" id="editPrice" name="editPrice" required><br>
+
+        <button type="submit">Изменить</button>
+        <button type="button" onclick="hidePopupForm('editPriceForm')">Отмена</button>
+    </form>
+</div>
+
+<div id="deletePriceForm" class="popup-form">
+    <h3>Удалить позицию в прайс-листе</h3>
+
+    <!-- Добавлено текстовое поле для ввода ID позиции в прайс-листе -->
+    <label for="deletePriceIdInput">Введите ID позиции в прайс-листе:</label>
+    <input type="text" id="deletePriceIdInput" required>
+    <button type="button" onclick="deletePrice()">Удалить позицию</button>
+
+    <button type="button" onclick="hidePopupForm('deletePriceForm')">Отмена</button>
+
+    <form action="/delete_price_list" method="post">
+        <!-- Добавлено скрытое поле для передачи ID позиции в прайс-листе -->
+        <input type="hidden" id="deletePriceId" name="deletePriceId" value="">
+    </form>
+</div>
+<script>
+    function showPopupForm(formId) {
+        document.getElementById(formId).style.display = 'block';
+    }
+
+    function hidePopupForm(formId) {
+        document.getElementById(formId).style.display = 'none';
+    }
+
+    function loadPriceData() {
+        var priceIdInput = document.getElementById("editPriceIdInput").value;
+        document.getElementById("editPriceId").value = priceIdInput;
+        // Fetch and populate price data based on the entered ID
+        // Add your AJAX request here to fetch price data by ID and populate the form
+    }
+
+    function searchPriceList() {
+        var searchText = document.getElementById('searchInput').value.toLowerCase();
+        var rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(function (row) {
+            var cells = row.getElementsByTagName('td');
+            var found = false;
+
+            for (var i = 0; i < cells.length; i++) {
+                var cellText = cells[i].innerText.toLowerCase();
+
+                if (cellText.includes(searchText)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+function deletePrice() {
+    var priceId = document.getElementById('deletePriceIdInput').value;
+
+    // Изменен URL на '/delete_price_list'
+    fetch(`/delete_price_list/${priceId}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => handleDeletePriceResponse(data));
+}
+
+function handleDeletePriceResponse(data) {
+    // Изменена проверка на успешное удаление
+    console.log(data);
+
+    if (data.success) {
+        // Измененный способ обновления страницы
+        // Вместо window.location.reload() можно использовать другой способ, например, обновление только таблицы
+        var priceTableBody = document.querySelector("#priceTableBody");
+        priceTableBody.innerHTML = ''; // Очистить текущие строки таблицы
+
+        // Загрузить обновленные данные (вместо reload)
+        loadPriceData();
+    } else {
+        // Остальная часть кода остается без изменений
+        alert('Ошибка при удалении позиции в прайс-листе: ' + data.message);
+    }
+}
+</script>
+
+</body>
+</html>

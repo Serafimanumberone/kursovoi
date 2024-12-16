@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о клиентах</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid black;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            color: white;
+            border-bottom: 2px solid white;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 10px;
+            margin: 5px;
+            background-color: white;
+            border: 1px solid black;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, border-radius 0.3s;
+            border-radius: 5px;
+        }
+        .button-container button:hover {
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<input type="text" id="searchInput" oninput="searchClientTable()" placeholder="Поиск...">
+<h2>Информация о клиентах</h2>
+<table id="clientTable"> <!-- Добавлен идентификатор clientTable -->
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Surname</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client[0] }}</td>
+                <td>{{ client[1] }}</td>
+                <td>{{ client[2] }}</td>
+                <td>{{ client[3] }}</td>
+                <td>{{ client[4] }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    function searchClientTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("clientTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Перебираем все строки таблицы и все ячейки в них
+        for (i = 0; i < tr.length; i++) {
+            var display = false; // Флаг для отображения строки
+
+            // Перебираем все ячейки в текущей строке
+            for (j = 0; j < tr[i].cells.length; j++) {
+                td = tr[i].cells[j];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+
+                    // Если хотя бы в одной ячейке есть соответствие поиску, устанавливаем флаг отображения
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        display = true;
+                        break; // Прерываем внутренний цикл, так как уже нашли соответствие
+                    }
+                }
+            }
+
+            // Устанавливаем стиль отображения в зависимости от флага
+            tr[i].style.display = display ? "" : "none";
+        }
+    }
+</script>
+</body>
+</html>
